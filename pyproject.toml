@@ -1,0 +1,10 @@
+[project]
+name = "assemblycar"
+version = "0.1.0"
+description = "차량 조립 콘솔 애플리케이션"
+requires-python = ">=3.9"
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+]
