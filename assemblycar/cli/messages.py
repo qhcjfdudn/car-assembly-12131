@@ -8,9 +8,9 @@ STEERING_TEXT = {Steering.BOSCH: "Bosch", Steering.MOBIS: "Mobis"}
 
 # 선택 직후 안내 문구("OO을 선택하셨습니다")에 쓰이는 표기 — 위의 RUN 결과 출력용
 # 표기와 대소문자/문구가 달라(예: 제동장치는 대문자, 고장난 엔진은 "고장난") 별도로 둔다.
-ENGINE_SELECT_TEXT = {Engine.GM: "GM", Engine.TOYOTA: "TOYOTA", Engine.WIA: "WIA", Engine.BROKEN: "고장난"}
-BRAKE_SELECT_TEXT = {Brake.MANDO: "MANDO", Brake.CONTINENTAL: "CONTINENTAL", Brake.BOSCH: "BOSCH"}
-STEERING_SELECT_TEXT = {Steering.BOSCH: "BOSCH", Steering.MOBIS: "MOBIS"}
+ENGINE_SELECT_TEXT = {**ENGINE_TEXT, Engine.BROKEN: "고장난"}
+BRAKE_SELECT_TEXT = {k: v.upper() for k, v in BRAKE_TEXT.items()}
+STEERING_SELECT_TEXT = {k: v.upper() for k, v in STEERING_TEXT.items()}
 
 REASON_TEXT = {
     Reason.SEDAN_CONTINENTAL: "Sedan에는 Continental제동장치 사용 불가",

@@ -40,24 +40,41 @@ class _Selection:
         )
 
 
-def _select_car_type(selection, ans):
-    selection.car_type = CarType(ans)
-    print(f"차량 타입으로 {CAR_TYPE_TEXT[selection.car_type]}을 선택하셨습니다.")
+@dataclass(frozen=True)
+class _StepConfig:
+    field: str
+    enum_cls: type
+    text_map: dict
+    message: str
+    next_step: int
 
 
-def _select_engine(selection, ans):
-    selection.engine = Engine(ans)
-    print(f"{ENGINE_SELECT_TEXT[selection.engine]} 엔진을 선택하셨습니다.")
+_STEP_CONFIGS = {
+    CAR_TYPE_Q: _StepConfig(
+        "car_type", CarType, CAR_TYPE_TEXT,
+        "차량 타입으로 {name}을 선택하셨습니다.", ENGINE_Q,
+    ),
+    ENGINE_Q: _StepConfig(
+        "engine", Engine, ENGINE_SELECT_TEXT,
+        "{name} 엔진을 선택하셨습니다.", BRAKE_SYSTEM_Q,
+    ),
+    BRAKE_SYSTEM_Q: _StepConfig(
+        "brake", Brake, BRAKE_SELECT_TEXT,
+        "{name} 제동장치를 선택하셨습니다.", STEERING_SYSTEM_Q,
+    ),
+    STEERING_SYSTEM_Q: _StepConfig(
+        "steering", Steering, STEERING_SELECT_TEXT,
+        "{name} 조향장치를 선택하셨습니다.", RUN_TEST,
+    ),
+}
 
 
-def _select_brake(selection, ans):
-    selection.brake = Brake(ans)
-    print(f"{BRAKE_SELECT_TEXT[selection.brake]} 제동장치를 선택하셨습니다.")
-
-
-def _select_steering(selection, ans):
-    selection.steering = Steering(ans)
-    print(f"{STEERING_SELECT_TEXT[selection.steering]} 조향장치를 선택하셨습니다.")
+def _apply_selection(selection, step, ans):
+    cfg = _STEP_CONFIGS[step]
+    value = cfg.enum_cls(ans)
+    setattr(selection, cfg.field, value)
+    print(cfg.message.format(name=cfg.text_map[value]))
+    return cfg.next_step
 
 
 def _run_produced_car(spec):
@@ -116,22 +133,9 @@ def main():
                 step = step - 1
             continue
 
-        if step == CAR_TYPE_Q:
-            _select_car_type(selection, ans)
+        if step in _STEP_CONFIGS:
+            step = _apply_selection(selection, step, ans)
             delay(800)
-            step = ENGINE_Q
-        elif step == ENGINE_Q:
-            _select_engine(selection, ans)
-            delay(800)
-            step = BRAKE_SYSTEM_Q
-        elif step == BRAKE_SYSTEM_Q:
-            _select_brake(selection, ans)
-            delay(800)
-            step = STEERING_SYSTEM_Q
-        elif step == STEERING_SYSTEM_Q:
-            _select_steering(selection, ans)
-            delay(800)
-            step = RUN_TEST
         elif step == RUN_TEST:
             if ans == 1:
                 _run_produced_car(selection.to_spec())

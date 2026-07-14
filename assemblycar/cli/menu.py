@@ -49,25 +49,17 @@ def show_menu(step):
         print("2. Test")
     print("===============================")
 
+_STEP_RANGES = {
+    0: (1, 3, "ERROR :: 차량 타입은 1 ~ 3 범위만 선택 가능"),
+    1: (0, 4, "ERROR :: 엔진은 1 ~ 4 범위만 선택 가능"),
+    2: (0, 3, "ERROR :: 제동장치는 1 ~ 3 범위만 선택 가능"),
+    3: (0, 2, "ERROR :: 조향장치는 1 ~ 2 범위만 선택 가능"),
+    4: (0, 2, "ERROR :: Run 또는 Test 중 하나를 선택 필요"),
+}
+
 def is_valid_range(step, ans):
-    if step == 0:
-        if ans < 1 or ans > 3:
-            print("ERROR :: 차량 타입은 1 ~ 3 범위만 선택 가능")
-            return False
-    if step == 1:
-        if ans < 0 or ans > 4:
-            print("ERROR :: 엔진은 1 ~ 4 범위만 선택 가능")
-            return False
-    if step == 2:
-        if ans < 0 or ans > 3:
-            print("ERROR :: 제동장치는 1 ~ 3 범위만 선택 가능")
-            return False
-    if step == 3:
-        if ans < 0 or ans > 2:
-            print("ERROR :: 조향장치는 1 ~ 2 범위만 선택 가능")
-            return False
-    if step == 4:
-        if ans < 0 or ans > 2:
-            print("ERROR :: Run 또는 Test 중 하나를 선택 필요")
-            return False
+    low, high, error_message = _STEP_RANGES[step]
+    if ans < low or ans > high:
+        print(error_message)
+        return False
     return True
