@@ -1,6 +1,12 @@
 import time
 import sys
 
+from assemblycar.domain.assembly import run as domain_run
+from assemblycar.domain.assembly import test as domain_test
+from assemblycar.domain.rules import Reason
+from assemblycar.domain.spec import CarSpec
+from assemblycar.domain.types import Brake, CarType, Engine, Steering
+
 CLEAR_SCREEN = "\033[H\033[2J"
 
 CarType_Q = 0
@@ -139,69 +145,54 @@ def select_steering(a):
     elif a == 2:
         print("MOBIS 조향장치를 선택하셨습니다.")
 
+CAR_TYPE_TEXT = {CarType.SEDAN: "Sedan", CarType.SUV: "SUV", CarType.TRUCK: "Truck"}
+ENGINE_TEXT = {Engine.GM: "GM", Engine.TOYOTA: "TOYOTA", Engine.WIA: "WIA"}
+BRAKE_TEXT = {Brake.MANDO: "Mando", Brake.CONTINENTAL: "Continental", Brake.BOSCH: "Bosch"}
+STEERING_TEXT = {Steering.BOSCH: "Bosch", Steering.MOBIS: "Mobis"}
+
+REASON_TEXT = {
+    Reason.SEDAN_CONTINENTAL: "Sedan에는 Continental제동장치 사용 불가",
+    Reason.SUV_TOYOTA: "SUV에는 TOYOTA엔진 사용 불가",
+    Reason.TRUCK_WIA: "Truck에는 WIA엔진 사용 불가",
+    Reason.TRUCK_MANDO: "Truck에는 Mando제동장치 사용 불가",
+    Reason.BOSCH_BRAKE_NON_BOSCH_STEERING: "Bosch제동장치에는 Bosch조향장치 이외 사용 불가",
+}
+
+def _current_spec():
+    return CarSpec(
+        car_type=CarType(q0),
+        engine=Engine(q1),
+        brake=Brake(q2),
+        steering=Steering(q3),
+    )
+
 def is_valid_check():
-    if q0 == SEDAN and q2 == CONTINENTAL:
-        return False
-    if q0 == SUV and q1 == TOYOTA:
-        return False
-    if q0 == TRUCK and q1 == WIA:
-        return False
-    if q0 == TRUCK and q2 == MANDO:
-        return False
-    if q2 == BOSCH_B and q3 != BOSCH_S:
-        return False
-    return True
+    return domain_test(_current_spec()).passed
 
 def run_produced_car():
-    if not is_valid_check():
-        print("자동차가 동작되지 않습니다")
+    result = domain_run(_current_spec())
+
+    if not result.ok:
+        if result.broken_engine:
+            print("엔진이 고장나있습니다.")
+            print("자동차가 움직이지 않습니다.")
+        else:
+            print("자동차가 동작되지 않습니다")
         return
-    if q1 == 4:
-        print("엔진이 고장나있습니다.")
-        print("자동차가 움직이지 않습니다.")
-        return
 
-    if q0 == 1:
-        print("Car Type : Sedan")
-    elif q0 == 2:
-        print("Car Type : SUV")
-    elif q0 == 3:
-        print("Car Type : Truck")
-
-    if q1 == 1:
-        print("Engine   : GM")
-    elif q1 == 2:
-        print("Engine   : TOYOTA")
-    elif q1 == 3:
-        print("Engine   : WIA")
-
-    if q2 == 1:
-        print("Brake    : Mando")
-    elif q2 == 2:
-        print("Brake    : Continental")
-    elif q2 == 3:
-        print("Brake    : Bosch")
-
-    if q3 == 1:
-        print("Steering : Bosch")
-    elif q3 == 2:
-        print("Steering : Mobis")
-
+    spec = result.spec
+    print(f"Car Type : {CAR_TYPE_TEXT[spec.car_type]}")
+    print(f"Engine   : {ENGINE_TEXT[spec.engine]}")
+    print(f"Brake    : {BRAKE_TEXT[spec.brake]}")
+    print(f"Steering : {STEERING_TEXT[spec.steering]}")
     print("자동차가 동작됩니다.")
 
 def test_produced_car():
-    if q0 == SEDAN and q2 == CONTINENTAL:
-        print("FAIL\nSedan에는 Continental제동장치 사용 불가")
-    elif q0 == SUV and q1 == TOYOTA:
-        print("FAIL\nSUV에는 TOYOTA엔진 사용 불가")
-    elif q0 == TRUCK and q1 == WIA:
-        print("FAIL\nTruck에는 WIA엔진 사용 불가")
-    elif q0 == TRUCK and q2 == MANDO:
-        print("FAIL\nTruck에는 Mando제동장치 사용 불가")
-    elif q2 == BOSCH_B and q3 != BOSCH_S:
-        print("FAIL\nBosch제동장치에는 Bosch조향장치 이외 사용 불가")
-    else:
+    result = domain_test(_current_spec())
+    if result.passed:
         print("PASS")
+        return
+    print(f"FAIL\n{REASON_TEXT[result.reasons[0]]}")
 
 def main():
     step = 0
