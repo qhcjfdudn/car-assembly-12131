@@ -8,3 +8,6 @@ requires-python = ">=3.9"
 dev = [
     "pytest",
 ]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

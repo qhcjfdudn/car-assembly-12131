@@ -33,10 +33,10 @@ assemblyCar(차량 조립 프로젝트)는 사용자가 차량을 조립하는 �
 
 ## 실행 방법
 
-저장소에는 빌드 시스템, CI, 의존성 매니페스트가 존재하지 않습니다. 표준 라이브러리만 사용합니다.
+의존성은 `pyproject.toml`에 선언되어 있습니다(`pip install -e .[dev]`로 pytest 설치).
 
 - Python: `python assemble.py`
-- 단위 테스트(`test_assemble.py`, 표준 라이브러리 `unittest`): `python -m unittest test_assemble -v`
+- 단위 테스트(`tests/`, pytest): `pytest -v`
 
 ## 편집 시 참고사항
 
